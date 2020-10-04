@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tweet Objects from Node</title>
+    <style>
+      #output {
+        font-size: 1.4em;
+        list-style: none;
+      }
+
+      #output li {
+        display: block;
+        color: #222;
+        background-color: white;
+        line-height: 30px;
+        border-bottom: solid 1px #cccccc;
+        padding-left: 10px;
+        cursor: pointer;
+      }
+
+      #output li a {
+        color: #222;
+        text-decoration: none;
+      }
+
+      #output li:hover {
+        background-color: #ddd;
+      }
+
+      #output li span {
+        color: #666;
+        font-size: 0.8em;
+      }
+    </style>
+  </head>
+
+  <body>
+    <form id="mesSender">
+      <textarea id="newMessage" rows="4"></textarea>
+      <br />
+      <button type="submit">Post of Twitter</button>
+    </form>
+    <button id="btn">Get the Information about Chelsea FC</button>
+    <input type="text" id="search" value="" placeholder="search Term" />
+    <button id="getTweets">Search Tweets</button>
+    <ul id="output"></ul>
+    <script>
+      const search = document.getElementById('search');
+      const getTweets = document.getElementById('getTweets');
+      const output = document.getElementById('output');
+      const mesSender = document.getElementById('mesSender');
+      const btn = document.getElementById('btn');
+
+      btn.addEventListener('click', getChelsea);
+      mesSender.addEventListener('submit', addComment);
+      getTweets.addEventListener('click', getAllTweets);
+      function getChelsea() {
+        fetch('/comment/chelsea')
+          .then(res => {
+            return res.json();
+          })
+          .then(data => {
+            console.log(data);
+            output.innerHTML = '';
+            data.forEach((item, index) => {
+              const li = document.createElement('li');
+              const span = document.createElement('span');
+              const hyper = `<a href="https://twitter.com/i/web/status/${item.id_str}" target="_blank">${item.text}</a>`;
+              //   const img = `<img href="${item.extended_entities.media[0].media_url}" >`;
+              span.innerHTML = `${hyper}<small>${item.user.name} -- ${item.created_at}</small>`;
+              //   li.appendChild(img);
+              li.appendChild(span);
+              output.appendChild(li);
+            });
+          })
+          .catch(err => {
+            console.log(err);
+          });
+      }
+
+      function addComment(e) {
+        e.preventDefault();
+        const newTweetComment = {
+          comment: document.getElementById('newMessage').value,
+        };
+        const url = '/comment';
+
+        fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(newTweetComment),
+        })
+          .then(res => {
+            console.log(res);
+            return res.json();
+          })
+          .then(data => {
+            console.log(data);
+          })
+          .catch(err => {
+            console.log(err);
+          });
+      }
+      function getAllTweets() {
+        const url = '/tweets/' + search.value;
+        fetch(url)
+          .then(res => {
+            return res.json();
+          })
+          .then(data => {
+            outputTweets(data.statuses);
+          })
+          .catch(err => {
+            console.log(JSON.stringify(err));
+          });
+      }
+
+      function outputTweets(data) {
+        console.log(data);
+        output.innerHTML = '';
+        data.forEach((item, index) => {
+          const li = document.createElement('li');
+          const span = document.createElement('span');
+          const hyper = `<a href="https://twitter.com/i/web/status/${item.id_str}" target="_blank">${item.text}</a>`;
+          span.innerHTML = `${hyper}<small>${item.user.name}</small>`;
+          li.appendChild(span);
+          output.appendChild(li);
+        });
+      }
+    </script>
+  </body>
+</html>
