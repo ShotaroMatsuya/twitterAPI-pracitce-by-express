@@ -54,7 +54,7 @@ app.get('/timeline/shotaro', (req, res) => {
   const screen_name = 'Shotaro59432703';
   T.get(
     'statuses/user_timeline',
-    { screen_name: screen_name, count: 8 },
+    { screen_name: screen_name, count: 6 },
     function (err, data, response) {
       res.json(data);
     }
